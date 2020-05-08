@@ -19,6 +19,7 @@
 
 #ifdef DEBUG
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 #import <SocketRocket/SRWebSocket.h>
 
 @interface WXDemoViewController : UIViewController<SRWebSocketDelegate>

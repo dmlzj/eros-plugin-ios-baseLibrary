@@ -18,13 +18,13 @@
 #import "BMNative.h"
 #import "UIColor+Util.h"
 
-@interface BMWebViewController () <UIWebViewDelegate, JSExport>
+@interface BMWebViewController () <WKNavigationDelegate, JSExport>
 {
     BOOL _showProgress;
 }
 
 @property (nonatomic, strong) JSContext *jsContext;
-@property (nonatomic, strong) UIWebView *webView;
+@property (nonatomic, strong) WKWebView *webView;
 
 /** 伪进度条 */
 @property (nonatomic, strong) CAShapeLayer *progressLayer;
@@ -67,10 +67,10 @@
     // 减去 Indicator 高度
     height -= K_TOUCHBAR_HEIGHT;
 
-    self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, K_SCREEN_WIDTH, height)];
+    self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, K_SCREEN_WIDTH, height)];
     self.webView.backgroundColor = self.routerInfo.backgroundColor? [UIColor colorWithHexString:self.routerInfo.backgroundColor]: K_BACKGROUND_COLOR;
     self.webView.scrollView.bounces = NO;
-    self.webView.delegate = self;
+    self.webView.navigationDelegate = self;
 
     self.view.backgroundColor = self.routerInfo.backgroundColor? [UIColor colorWithHexString:self.routerInfo.backgroundColor]: K_BACKGROUND_COLOR;
 
@@ -200,9 +200,8 @@
 }
 
 
-#pragma mark - UIWebViewDelegate
-
-- (void)webViewDidStartLoad:(UIWebView *)webView
+#pragma mark - WKNavigationDelegate
+-(void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation
 {
     if (!self.timer) {
         self.timer = [NSTimer scheduledTimerWithTimeInterval:0.15 target:self selector:@selector(progressAnimation:) userInfo:nil repeats:YES];
@@ -216,30 +215,29 @@
     
     _showProgress = YES;
 }
-
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
-{
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    
     /* 如果是goBack的操作 从新加载url避免有些页面加载不完全的问题 */
-    if (navigationType == UIWebViewNavigationTypeBackForward) {
+    if (navigationAction.navigationType == WKNavigationTypeBackForward) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            NSURL *url = [NSURL URLWithString:request.URL.absoluteString];
+            NSURL *url = [NSURL URLWithString:navigationAction.request.URL.absoluteString];
             NSURLRequest *request = [NSURLRequest requestWithURL:url];
             [self.webView loadRequest:request];
         });
-        return YES;
+    decisionHandler(WKNavigationActionPolicyAllow);
     }
     
-    WXLogInfo(@"%@",request.URL.absoluteString);
-    
-    return YES;
+    WXLogInfo(@"%@",navigationAction.request.URL.absoluteString);
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
-
-- (void)webViewDidFinishLoad:(UIWebView *)webView
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
     /** 检查一下字体大小 */
     [self.webView checkCurrentFontSize];
-    
-    NSString * docTitle = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    __block NSString * docTitle;
+    [webView evaluateJavaScript:@"document.title" completionHandler:^(id _Nullable result, NSError * _Nullable error) {
+        docTitle = (NSString *)result;
+       }];
     if (docTitle && docTitle.length) {
         self.navigationItem.title = docTitle;
     }
@@ -256,8 +254,7 @@
         });
     }
 }
-
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
     WXLogInfo(@"\n******************** - WebView didFailLoad - ********************\n %@",error);
     
@@ -270,9 +267,8 @@
         _progressLayer = nil;
     }
     
-    WXLogInfo(@"\n******************** - WebView didFailLoad - ********************\n %@",webView.request.URL.absoluteString);
+    WXLogInfo(@"\n******************** - WebView didFailLoad - ********************\n %@",webView.URL.absoluteString);
 }
-
 - (void)progressAnimation:(NSTimer *)timer
 {
     self.progressLayer.strokeEnd += 0.005f;
@@ -283,7 +279,6 @@
         [_timer pauseTimer];
     }
 }
-
 
 /**
  注入 js 方法

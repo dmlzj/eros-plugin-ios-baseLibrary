@@ -11,7 +11,7 @@
 
 @interface WXWebComponent (BMExtend)
 
-- (void)bm_webViewDidFinishLoad:(UIWebView *)webView;
+- (void)bm_webViewDidFinishLoad:(WKWebView *)webView;
 
 - (void)bm_viewDidLoad;
 

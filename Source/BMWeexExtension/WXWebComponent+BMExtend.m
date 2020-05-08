@@ -15,7 +15,7 @@
 
 @implementation WXWebComponent (BMExtend)
 
-- (void)bm_webViewDidFinishLoad:(UIWebView *)webView
+- (void)bm_webViewDidFinishLoad:(WKWebView *)webView
 {
     [self bm_webViewDidFinishLoad:webView];
     
@@ -30,13 +30,13 @@
 - (void)bm_viewDidLoad
 {
     [self bm_viewDidLoad];
-    UIWebView * webview = (UIWebView *)self.view;
+    WKWebView * webview = (WKWebView *)self.view;
     webview.opaque = NO;
     webview.backgroundColor = [UIColor clearColor];
     
-    JSContext *jsContext = [self valueForKey:@"jsContext"];
-    BMNative *bmnative = [[BMNative alloc] init];
-    jsContext[@"bmnative"] = bmnative;
+//    JSContext *jsContext = [self valueForKey:@"jsContext"];
+//    BMNative *bmnative = [[BMNative alloc] init];
+//    jsContext[@"bmnative"] = bmnative;
     
     if (self.attributes[@"scrollEnabled"] && NO == [self.attributes[@"scrollEnabled"] boolValue]) {
         webview.scrollView.scrollEnabled = NO;
@@ -60,14 +60,14 @@
 -(void)bm_loadURL:(NSString *)url
 {
     WXPerformBlockOnMainThread(^{
-        UIWebView * webview = (UIWebView *)self.view;
+        WKWebView * webview = (WKWebView *)self.view;
         
         if(webview){
             NSURL *urlPath = [NSURL URLWithString:url];
             if([urlPath.scheme isEqualToString:BM_LOCAL]){
                 if (BM_InterceptorOn()) {
                     NSURLRequest *request = [NSURLRequest requestWithURL:TK_RewriteBMLocalURL(url)];
-                    [webview loadRequest:request];
+                    [webview loadFileURL:request.URL allowingReadAccessToURL:request.URL];
                 }else {
                     NSString *debugUrl = TK_RewriteBMLocalURL(url).absoluteString;
                     [self bm_loadURL:debugUrl];

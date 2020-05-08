@@ -8,7 +8,7 @@
 
 #import "UIWebView+BMExtend.h"
 
-@implementation UIWebView (BMExtend)
+@implementation WKWebView (BMExtend)
 
 - (void)checkCurrentFontSize
 {
@@ -21,7 +21,8 @@
     
     NSInteger fontSize = 100 + currentLevel * 5 - 5;
     NSString *jsStr = [NSString stringWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust= '%ld%%'",(long)fontSize];
-    [self stringByEvaluatingJavaScriptFromString:jsStr];
+    [self evaluateJavaScript:jsStr completionHandler:nil];
+
 }
 
 @end
