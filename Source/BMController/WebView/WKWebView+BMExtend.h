@@ -1,5 +1,5 @@
 //
-//  UIWebView+BMExtend.h
+//  WKWebView+BMExtend.h
 //  Pods
 //
 //  Created by XHY on 2017/6/30.

@@ -13,7 +13,7 @@
 #import "BMMediatorManager.h"
 #import <UINavigationController+FDFullscreenPopGesture.h>
 #import <JavaScriptCore/JavaScriptCore.h>
-#import "UIWebView+BMExtend.h"
+#import "WKWebView+BMExtend.h"
 #import "BMUserInfoModel.h"
 #import "BMNative.h"
 #import "UIColor+Util.h"

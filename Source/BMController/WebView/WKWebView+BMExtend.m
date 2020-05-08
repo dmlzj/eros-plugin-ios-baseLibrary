@@ -1,12 +1,12 @@
 //
-//  UIWebView+BMExtend.m
+//  WKWebView+BMExtend.m
 //  Pods
 //
 //  Created by XHY on 2017/6/30.
 //
 //
 
-#import "UIWebView+BMExtend.h"
+#import "WKWebView+BMExtend.h"
 
 @implementation WKWebView (BMExtend)
 
