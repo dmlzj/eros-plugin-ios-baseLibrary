@@ -77,9 +77,9 @@
     self.urlStr = self.routerInfo.url;
     [self reloadURL];
     
-    /* 获取js的运行环境 */
-    self.jsContext = [self.webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-    [self injectionJsMethod];
+//     /* 获取js的运行环境 */
+//     self.jsContext = [self.webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+//     [self injectionJsMethod];
 }
 
 - (CAShapeLayer *)progressLayer
